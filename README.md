@@ -9,7 +9,7 @@ import { setup } from "prettierrun/build/prettierRun";
 
 setup({
     pretierCfgPath: "path/to/your/prettier/config,
-    projectRoot: `root/of/project`
+    projectRoot: "root/of/project"
 }).runPrettier();
 ```
 ## how it works?
