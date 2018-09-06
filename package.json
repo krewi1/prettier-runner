@@ -1,0 +1,27 @@
+{
+  "name": "prettierrun",
+  "version": "1.0.0",
+  "description": "run script for prettier",
+  "main": "build/prettierRun.js",
+  "bin": {"prettier-run": "build/prettierRun.js"},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "prettier",
+    "automation"
+  ],
+  "author": "kratochvilp@post.cz",
+  "license": "ISC",
+  "dependencies": {
+    "@types/node": "^10.9.4",
+    "prettier": "^1.14.2",
+    "typescript": "^3.0.3"
+  },
+  "devDependencies": {
+    "@types/prettier": "^1.13.2"
+  },
+  "files": [
+    "build"
+  ]
+}
