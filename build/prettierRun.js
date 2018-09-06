@@ -32,7 +32,7 @@ function setup(config) {
                 const changed = yield execute("git diff --name-only");
                 const changedFiles = changed.split("\n").map(toFullPath);
                 const filesToChange = changedFiles.filter(isTs);
-                const prettierConfig = yield prettier_1.resolveConfig(config.pretierCfgPath);
+                const prettierConfig = yield prettier_1.resolveConfig(config.prettierCfgPath);
                 if (prettierConfig) {
                     const prettierLove = withPrettierOptions(prettierConfig);
                     yield Promise.all(filesToChange.map(prettierLove));
@@ -64,4 +64,3 @@ function setup(config) {
     };
 }
 exports.setup = setup;
-//# sourceMappingURL=prettierRun.js.map

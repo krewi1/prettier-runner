@@ -9,7 +9,7 @@ const writeFileAsync = promisify(writeFile);
 
 export interface PrettierRunConfig {
     projectRoot: string;
-    pretierCfgPath: string;
+    prettierCfgPath: string;
 }
 
 export function setup(config: PrettierRunConfig) {
@@ -30,12 +30,12 @@ export function setup(config: PrettierRunConfig) {
             const changedFiles: string[] = changed.split("\n").map(toFullPath);
             const filesToChange = changedFiles.filter(isTs);
 
-            const prettierConfig = await resolveConfig(config.pretierCfgPath);
-            if(prettierConfig) {
+            const prettierConfig = await resolveConfig(config.prettierCfgPath);
+            if (prettierConfig) {
                 const prettierLove = withPrettierOptions(prettierConfig);
                 await Promise.all(filesToChange.map(prettierLove));
             } else {
-                console.log("invalid prettier config path");
+                console.log("Invalid prettier config path.");
             }
         } catch (err) {
             console.log(err);
@@ -58,8 +58,7 @@ export function setup(config: PrettierRunConfig) {
         return file.endsWith(".ts");
     }
 
-
     return {
         runPrettier
-    }
+    };
 }
