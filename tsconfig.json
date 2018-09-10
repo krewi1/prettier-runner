@@ -20,5 +20,8 @@
         "noImplicitReturns": true,
         "noFallthroughCasesInSwitch": true,
         "declaration": true
-    }
+    },
+    "files": [
+        "src/prettierRun.ts"
+    ]
 }

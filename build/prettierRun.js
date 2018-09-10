@@ -29,21 +29,26 @@ function setup(config) {
     function runPrettier() {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const changed = yield execute("git diff --name-only");
-                const changedFiles = changed.split("\n").map(toFullPath);
-                const filesToChange = changedFiles.filter(isTs);
+                const filesToChange = config.changedPaths || (yield getChangedFilesFromGit());
                 const prettierConfig = yield prettier_1.resolveConfig(config.prettierCfgPath);
                 if (prettierConfig) {
                     const prettierLove = withPrettierOptions(prettierConfig);
                     yield Promise.all(filesToChange.map(prettierLove));
                 }
                 else {
-                    console.log("invalid prettier config path");
+                    console.log("Invalid prettier config path.");
                 }
             }
             catch (err) {
                 console.log(err);
             }
+        });
+    }
+    function getChangedFilesFromGit() {
+        return __awaiter(this, void 0, void 0, function* () {
+            const changed = yield execute("git diff --name-only");
+            const changedFiles = changed.split("\n").map(toFullPath);
+            return changedFiles.filter(isTs);
         });
     }
     function toFullPath(file) {

@@ -55,6 +55,30 @@ function f() {
         });
     });
 
+    describe("files are provided from external source", () => {
+        it("then format them", async () => {
+            // given
+            exec.yields(undefined, jsName);
+            const iface = setup({
+                prettierCfgPath: packageJsonPath,
+                projectRoot: __dirname,
+                changedPaths: ["test/test.ts"]
+            });
+
+            // when
+            await iface.runPrettier();
+
+            // then
+            const result = await readFileAsync(jsPath);
+            expect(result.toString()).to.equal(`import { a } from "a";
+
+function f() {
+    return a;
+}
+`);
+        });
+    });
+
     describe("files are returned by git", () => {
         it("then format them", async () => {
             // given
