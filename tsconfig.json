@@ -23,5 +23,8 @@
     },
     "files": [
         "src/prettierRun.ts"
+    ],
+    "exclude": [
+        "test/**/**/*.ts"
     ]
 }

@@ -1,8 +1,9 @@
 import { exec } from "child_process";
 import { resolve } from "path";
-import { format, resolveConfig, Options } from "prettier";
+import { check, format, resolveConfig, Options } from "prettier";
 import { promisify } from "util";
 import { readFile, writeFile } from "fs";
+import { Linter, Configuration } from "tslint";
 
 const readFileAsync = promisify(readFile);
 const writeFileAsync = promisify(writeFile);
@@ -10,10 +11,17 @@ const writeFileAsync = promisify(writeFile);
 export interface PrettierRunConfig {
     projectRoot: string;
     prettierCfgPath: string;
+    tslintCfgPath: string;
     changedPaths?: string[];
 }
 
-export function setup(config: PrettierRunConfig) {
+export interface PrettierRunner {
+    runPrettier: () => void;
+    prettierCheck: () => void;
+    tsLintCheck: () => void;
+}
+
+export function setup(config: PrettierRunConfig): PrettierRunner {
     function execute(command: string): Promise<string> {
         return new Promise((resolve, reject) => {
             exec(command, (error, stdout) => {
@@ -40,6 +48,37 @@ export function setup(config: PrettierRunConfig) {
         }
     }
 
+    async function prettierCheck() {
+        try {
+            const filesToChange = config.changedPaths || await getChangedFilesFromGit();
+            const prettierConfig = await resolveConfig(config.prettierCfgPath);
+            if (prettierConfig) {
+                const contents = await Promise.all(filesToChange.map((file: string) => readFileAsync(file, "utf8")));
+                return contents.every((content: string) => check(content, prettierConfig))
+            }
+        } catch (err) {
+            throw new Error("Invalid cfg path");
+        }
+        throw new Error("Something bad happeds");
+    }
+
+    async function tsLintCheck() {
+        const filesToChange = config.changedPaths || await getChangedFilesFromGit();
+        const fileName = filesToChange[0];
+        const configurationFilename = config.tslintCfgPath;
+        const options = {
+            fix: true,
+            formatter: "json"
+        };
+
+        const fileContents = await readFileAsync(fileName, "utf8");
+        const linter = new Linter(options);
+        const configuration = Configuration.findConfiguration(configurationFilename, fileName).results;
+        linter.lint(fileName, fileContents, configuration);
+        const result = linter.getResult();
+        console.log(result);
+    }
+
     async function getChangedFilesFromGit() {
         const changed: string = await execute("git diff --name-only");
         const changedFiles: string[] = changed.split("\n").map(toFullPath);
@@ -63,6 +102,8 @@ export function setup(config: PrettierRunConfig) {
     }
 
     return {
-        runPrettier
+        runPrettier,
+        prettierCheck,
+        tsLintCheck
     };
 }
