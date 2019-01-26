@@ -1,9 +1,9 @@
-import { exec } from "child_process";
-import { resolve } from "path";
-import { check, format, resolveConfig, Options } from "prettier";
-import { promisify } from "util";
-import { readFile, writeFile } from "fs";
-import { Linter, Configuration } from "tslint";
+import {exec} from "child_process";
+import {resolve} from "path";
+import {check, format, resolveConfig, Options} from "prettier";
+import {promisify} from "util";
+import {readFile, writeFile} from "fs";
+import {Linter, Configuration} from "tslint";
 
 const readFileAsync = promisify(readFile);
 const writeFileAsync = promisify(writeFile);
@@ -16,26 +16,66 @@ export interface PrettierRunConfig {
 }
 
 export interface PrettierRunner {
-    runPrettier: () => void;
-    prettierCheck: () => void;
-    tsLintCheck: () => void;
+    runPipe: () => void;
 }
 
-export function setup(config: PrettierRunConfig): PrettierRunner {
-    function execute(command: string): Promise<string> {
-        return new Promise((resolve, reject) => {
-            exec(command, (error, stdout) => {
-                if (error) {
-                    return reject(error);
-                }
-                resolve(stdout);
-            });
+function execute(command: string): Promise<string> {
+    return new Promise((resolve, reject) => {
+        exec(command, (error, stdout) => {
+            if (error) {
+                return reject(error);
+            }
+            resolve(stdout);
         });
+    });
+}
+
+interface FormatterFactory<T = {}> {
+    (options: T): IFormatter
+}
+
+interface IFormatter {
+    fix: () => Promise<IResultSet>;
+    check: () => Promise<IResultSet>;
+    configure: () => void;
+}
+
+interface FormatterData {
+    fileType: RegExp,
+    configFile: string,
+    formatter: IFormatter
+}
+
+interface IResultSet {
+    problems: string;
+}
+
+interface IFormattingFunction {
+    (): Promise<IResultSet>
+}
+
+const promiseSerial = (funcs: IFormattingFunction[]) =>
+    funcs.reduce((promise: Promise<IResultSet[]>, func: IFormattingFunction) =>
+            promise.then(result => func().then((resultSet) => [...result, resultSet])),
+        Promise.resolve([]));
+
+export function setup(config: PrettierRunConfig): PrettierRunner {
+    const formatter = {
+        runPipe,
+        registerFormatter
+    };
+
+    const formatters: FormatterData[] = [];
+
+    function registerFormatter(formatter: FormatterData) {
+        formatters.push(formatter);
     }
 
-    async function runPrettier() {
+    async function runPipe() {
         try {
             const filesToChange = config.changedPaths || await getChangedFilesFromGit();
+            const formatterPromises = formatters.map(({formatter}) => formatter.fix());
+            const resultSets = promiseSerial(formatterPromises)
             const prettierConfig = await resolveConfig(config.prettierCfgPath);
             if (prettierConfig) {
                 const prettierLove = withPrettierOptions(prettierConfig);
@@ -101,9 +141,5 @@ export function setup(config: PrettierRunConfig): PrettierRunner {
         return file.endsWith(".ts");
     }
 
-    return {
-        runPrettier,
-        prettierCheck,
-        tsLintCheck
-    };
+    return formatter;
 }
