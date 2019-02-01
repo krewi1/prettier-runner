@@ -102,22 +102,7 @@ export function setup(config: PrettierRunConfig): PrettierRunner {
         throw new Error("Something bad happeds");
     }
 
-    async function tsLintCheck() {
-        const filesToChange = config.changedPaths || await getChangedFilesFromGit();
-        const fileName = filesToChange[0];
-        const configurationFilename = config.tslintCfgPath;
-        const options = {
-            fix: true,
-            formatter: "json"
-        };
 
-        const fileContents = await readFileAsync(fileName, "utf8");
-        const linter = new Linter(options);
-        const configuration = Configuration.findConfiguration(configurationFilename, fileName).results;
-        linter.lint(fileName, fileContents, configuration);
-        const result = linter.getResult();
-        console.log(result);
-    }
 
     async function getChangedFilesFromGit() {
         const changed: string = await execute("git diff --name-only");
