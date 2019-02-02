@@ -16,6 +16,13 @@
     ],
     "jsdoc-format": true,
     "label-position": true,
+    "ordered-imports": [
+      true,
+      {
+        "import-sources-order": "case-insensitive",
+        "named-imports-order": "case-insensitive"
+      }
+    ],
     "member-ordering": [
       true,
       {
@@ -50,7 +57,6 @@
     "no-string-literal": false,
     "no-switch-case-fall-through": true,
     "no-unused-expression": false,
-    "no-unused-variable": true,
     "no-use-before-declare": false,
     "no-var-keyword": true,
     "no-var-requires": false,

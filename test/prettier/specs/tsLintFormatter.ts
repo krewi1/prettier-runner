@@ -11,7 +11,7 @@ assert.expose(assertion, { prefix: "" });
 const readFileAsync = promisify(readFile);
 const writeFileAsync = promisify(writeFile);
 const unlinkFileAsync = promisify(unlink);
-import {Prettier} from "../../../src/formatters/prettierFormatter";
+import {TsLint} from "../../../src/formatters/typescriptFormatter";
 
 const dirname: string = __dirname;
 const packageJsonPath: string = join(dirname, "package.json");
@@ -75,7 +75,7 @@ function f() {
     });
 });*/
 
-describe("Prettier runner", () => {
+describe("Tslint Formatter", () => {
     let sandBox: SinonSandbox;
     let exec: SinonStub;
 
@@ -94,6 +94,7 @@ describe("Prettier runner", () => {
         await writeFileAsync(
             jsPath,
             `import {a} from "a";
+import {format, check, something as blah} from "prettier";
 
 function f() {
     return a
@@ -103,12 +104,12 @@ function f() {
 
     describe("initialization", () => {
         it("runner is initialized and return its interface", async () => {
-            const prettier = await Prettier({
-                prettierCfgPath: `${__dirname}/${packageJsonPath}`
+            const tsLint = await TsLint({
+                tsLintCfgPath: `${dirname}/test.js`
             });
 
-            expect(prettier).to.haveOwnProperty("check");
-            expect(prettier).to.haveOwnProperty("fix");
+            expect(tsLint).to.haveOwnProperty("check");
+            expect(tsLint).to.haveOwnProperty("fix");
         });
     });
 
@@ -117,12 +118,12 @@ function f() {
             // given
             exec.yields(undefined, jsName);
 
-            const prettier = await Prettier({
-                prettierCfgPath: `${__dirname}/${packageJsonPath}`
+            const tsLint = await TsLint({
+                tsLintCfgPath: `${dirname}/tslint.json`
             });
 
             // when
-            await prettier.fix(jsPath);
+            await tsLint.fix(jsPath);
 
             // then
             const result = await readFileAsync(jsPath);
@@ -134,16 +135,16 @@ function f() {
 `);
         });
 
-        it("then format them", async () => {
+        it("then check them", async () => {
             // given
             exec.yields(undefined, jsName);
 
-            const prettier = await Prettier({
-                prettierCfgPath: `${__dirname}/${packageJsonPath}`
+            const tsLint = await TsLint({
+                tsLintCfgPath: `${dirname}/tslint.json`
             });
 
             // when
-            await prettier.check(jsPath);
+            await tsLint.check(jsPath);
 
             // then
             const result = await readFileAsync(jsPath);

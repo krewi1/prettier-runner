@@ -1,4 +1,4 @@
-import {IFormatter} from "./formatterData";
+import {fromRuleFailureToResult, IFormatter} from "./formatterData";
 import {readFileAsync} from "../promisify";
 import {Configuration, Linter} from "tslint";
 import {IConfigurationFile} from "tslint/lib/configuration";
@@ -7,7 +7,7 @@ interface TsLintData {
     tsLintCfgPath: string;
 }
 
-async function TsLint(options: TsLintData): Promise<IFormatter> {
+export async function TsLint(options: TsLintData): Promise<IFormatter> {
     const tsLintConfig = Configuration.findConfiguration(options.tsLintCfgPath).results;
     return {
         check: check(tsLintConfig!),
@@ -25,8 +25,11 @@ function check(options: IConfigurationFile){
         const fileContent = await readFileAsync(file, "utf8");
         linter.lint(file, fileContent, options);
         const result = linter.getResult();
-        console.log(result);
-        return null;
+        const {fixes = [], failures} = result;
+        return {
+            failures: failures.map(fromRuleFailureToResult),
+            autofixes: fixes.map(fromRuleFailureToResult)
+        };
     }
 }
 
@@ -40,7 +43,10 @@ function fix(options: IConfigurationFile){
         const fileContent = await readFileAsync(file, "utf8");
         linter.lint(file, fileContent, options);
         const result = linter.getResult();
-        console.log(result);
-        return null;
+        const {fixes = [], failures} = result;
+        return {
+            failures: failures.map(fromRuleFailureToResult),
+            autofixes: fixes.map(fromRuleFailureToResult)
+        };
     }
 }
