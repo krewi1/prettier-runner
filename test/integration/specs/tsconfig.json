@@ -1,0 +1,24 @@
+{
+    "compilerOptions": {
+        "module": "commonjs",
+        "target": "es6",
+        "sourceMap": true,
+        "removeComments": true,
+        "moduleResolution": "node",
+        "lib": [
+            "es6",
+            "es2015.core",
+            "es2015.promise"
+        ],
+        "noLib": false,
+        "preserveConstEnums": false,
+        "experimentalDecorators": true,
+        "outDir": "./build",
+        "strict": true,
+        "noUnusedLocals": true,
+        "noUnusedParameters": true,
+        "noImplicitReturns": true,
+        "noFallthroughCasesInSwitch": true,
+        "declaration": true
+    }
+}

@@ -4,13 +4,12 @@ import { expect, assert as assertion } from "chai";
 import * as process from "child_process";
 import { promisify } from "util";
 import { join } from "path";
-import { readFile, writeFile, unlink } from "fs";
+import { readFile, writeFile } from "fs";
 
 assert.expose(assertion, { prefix: "" });
 
 const readFileAsync = promisify(readFile);
 const writeFileAsync = promisify(writeFile);
-const unlinkFileAsync = promisify(unlink);
 import {Prettier} from "../../../src/formatters/prettierFormatter";
 
 const dirname: string = __dirname;

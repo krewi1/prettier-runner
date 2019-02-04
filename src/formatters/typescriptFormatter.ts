@@ -1,52 +1,70 @@
 import {fromRuleFailureToResult, IFormatter} from "./formatterData";
-import {readFileAsync} from "../promisify";
 import {Configuration, Linter} from "tslint";
+import {Program} from "typescript"
 import {IConfigurationFile} from "tslint/lib/configuration";
 
 interface TsLintData {
-    tsLintCfgPath: string;
+    tsLintPath: string;
+    tsConfigPath: string;
+    projectRoot: string;
 }
 
 export async function TsLint(options: TsLintData): Promise<IFormatter> {
-    const tsLintConfig = Configuration.findConfiguration(options.tsLintCfgPath).results;
+    const program = Linter.createProgram(options.tsConfigPath, options.projectRoot);
+    const tsLintConfig = Configuration.findConfiguration(options.tsLintPath).results;
     return {
-        check: check(tsLintConfig!),
-        fix: fix(tsLintConfig!)
+        check: check(tsLintConfig!, program),
+        fix: fix(tsLintConfig!, program)
     }
 }
 
-function check(options: IConfigurationFile){
+function check(options: IConfigurationFile, program: Program){
     return async (file: string) => {
-        const linterOptions = {
-            fix: false,
-            formatter: "json"
-        };
-        const linter = new Linter(linterOptions);
-        const fileContent = await readFileAsync(file, "utf8");
-        linter.lint(file, fileContent, options);
-        const result = linter.getResult();
-        const {fixes = [], failures} = result;
-        return {
-            failures: failures.map(fromRuleFailureToResult),
-            autofixes: fixes.map(fromRuleFailureToResult)
-        };
+        return await lint(options, program, file, false);
     }
 }
 
-function fix(options: IConfigurationFile){
+function fix(options: IConfigurationFile, program: Program){
     return async (file: string) => {
-        const linterOptions = {
-            fix: true,
-            formatter: "json"
-        };
-        const linter = new Linter(linterOptions);
-        const fileContent = await readFileAsync(file, "utf8");
-        linter.lint(file, fileContent, options);
-        const result = linter.getResult();
-        const {fixes = [], failures} = result;
-        return {
-            failures: failures.map(fromRuleFailureToResult),
-            autofixes: fixes.map(fromRuleFailureToResult)
-        };
+        return /*null*/await lint(options, program, file, true);
     }
+}
+
+async function lint(options: IConfigurationFile, program: Program, file: string, fix: boolean) {
+    const linterOptions = {
+        fix,
+        formatter: "json"
+    };
+    const linter = new Linter(linterOptions, program);
+    const fileContent = program.getSourceFile(file)!.getFullText();
+    linter.lint(file, fileContent, options);
+    const result = linter.getResult();
+    const {fixes = [], failures} = result;
+    return {
+        failures: failures.map(fromRuleFailureToResult),
+        autofixes: fixes.map(fromRuleFailureToResult)
+    };
+
+    /*const configurationFilename = "D:/projects/prettier-runner/test/integration/specs/tslint.json";
+    const linterOptions = {
+        fix: false,
+        formatter: "json"
+    };
+
+    const program = Linter.createProgram("D:/projects/prettier-runner/test/integration/specs/tsconfig.json", "D:/projects/prettier-runner/test/integration/specs");
+    const linter = new Linter(linterOptions, program);
+
+    const files = Linter.getFileNames(program);
+    files.forEach(file => {
+        const fileContents = program.getSourceFile(file)!.getFullText();
+        const configuration = Configuration.findConfiguration(configurationFilename, file).results;
+        linter.lint(file, fileContents, configuration);
+    });
+
+    const result = linter.getResult();
+    const {fixes = [], failures} = result;
+    return {
+        failures: failures.map(fromRuleFailureToResult),
+        autofixes: fixes.map(fromRuleFailureToResult)
+    };*/
 }

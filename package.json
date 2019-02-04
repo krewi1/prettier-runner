@@ -1,10 +1,10 @@
 {
-  "name": "prettierrun",
-  "version": "1.0.0",
-  "description": "run script for prettier",
-  "main": "build/prettierRun.js",
+  "name": "formatter-runner",
+  "version": "0.2.0",
+  "description": "tool for running code formatters and fixers",
+  "main": "build/formatterRunner.js",
   "bin": {
-    "prettier-run": "build/prettierRun.js"
+    "prettier-run": "build/formatterRunner.js"
   },
   "scripts": {
     "test": "mocha -r ts-node/register test/*.ts",
@@ -12,10 +12,11 @@
   },
   "keywords": [
     "prettier",
+    "tslint",
     "automation"
   ],
   "author": "kratochvilp@post.cz",
-  "license": "ISC",
+  "license": "MIT",
   "dependencies": {
     "@types/node": "^10.9.4",
     "@types/sinon-chai": "^3.2.0",
