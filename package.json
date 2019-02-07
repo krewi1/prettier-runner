@@ -36,5 +36,10 @@
   },
   "files": [
     "build"
-  ]
+  ],
+  "prettier": {
+    "printWidth": 140,
+    "tabWidth": 4,
+    "parser": "typescript"
+  }
 }

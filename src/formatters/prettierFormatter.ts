@@ -1,6 +1,6 @@
-import {IFormatter} from "./formatterData";
-import {resolveConfig, Options as PrettierOptions, format, check as prettierCheck, getFileInfo} from "prettier";
-import {readFileAsync, writeFileAsync} from "../promisify";
+import { IFormatter } from "./formatterData";
+import { resolveConfig, Options as PrettierOptions, format, check as prettierCheck, getFileInfo } from "prettier";
+import { readFileAsync, writeFileAsync } from "../promisify";
 
 interface PrettierFormatterData {
     prettierCfgPath: string;
@@ -11,19 +11,19 @@ export async function Prettier(options: PrettierFormatterData): Promise<IFormatt
     return {
         check: check(prettierConfig!),
         fix: fix(prettierConfig!)
-    }
+    };
 }
 
-function check(options: PrettierOptions){
+function check(options: PrettierOptions) {
     return async (file: string) => {
         const fileContent = await readFileAsync(file, "utf8");
         const formatted = prettierCheck(fileContent, options);
         writeFileAsync(file, formatted);
         return null;
-    }
+    };
 }
 
-function fix(options: PrettierOptions){
+function fix(options: PrettierOptions) {
     return async (file: string) => {
         const fileContent = await readFileAsync(file, "utf8");
         const info = await getFileInfo(file);
@@ -31,5 +31,5 @@ function fix(options: PrettierOptions){
         console.log(info);
         writeFileAsync(file, formatted);
         return null;
-    }
+    };
 }

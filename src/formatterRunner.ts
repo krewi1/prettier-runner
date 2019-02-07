@@ -1,23 +1,22 @@
-import {resolve} from "path";
-import {IFormatter, IResult, NullableResults} from "./formatters/formatterData";
-import {execute, promiseSerial} from "./promisify";
-
+import { resolve } from "path";
+import { IFormatter, IResult, NullableResults } from "./formatters/formatterData";
+import { execute, promiseSerial } from "./promisify";
 
 export interface FormatterRunnerConfig<T extends boolean> {
-    resolveChangeFiles: T
+    resolveChangeFiles: T;
     projectRoot?: T extends false ? string : never;
     changedFiles?: T extends false ? string[] : never;
 }
 
 export interface PrettierRunner {
-    registerFormatter: (formatter: FormatterData) => void,
+    registerFormatter: (formatter: FormatterData) => void;
     runFixPipe: () => void;
     runCheckPipe: () => void;
 }
 
 interface FormatterData {
-    fileType?: RegExp,
-    formatter: IFormatter
+    fileType?: RegExp;
+    formatter: IFormatter;
 }
 
 export function setup<T extends boolean>(config: FormatterRunnerConfig<T>): PrettierRunner {
@@ -29,10 +28,15 @@ export function setup<T extends boolean>(config: FormatterRunnerConfig<T>): Pret
 
     async function runFixPipe() {
         try {
-            const filesToChange = config.resolveChangeFiles ?  await getChangedFilesFromGit() : config.changedFiles;
-            const formatterPromises = formatters.map(({formatter, fileType = ""}) => ({fnc: formatter.fix, fileType: fileType || ""}));
-            const results: NullableResults[] = await filesToChange!.map((file: string) => promiseSerial(formatterPromises.filter((formatter) => file.match(formatter.fileType)).map((formatter) => formatter.fnc), file));
-            return await results.reduce(toFinalResult, Promise.resolve({autofixes: [], failures: []}));
+            const filesToChange = config.resolveChangeFiles ? await getChangedFilesFromGit() : config.changedFiles;
+            const formatterPromises = formatters.map(({ formatter, fileType = "" }) => ({
+                fnc: formatter.fix,
+                fileType: fileType || ""
+            }));
+            const results: NullableResults[] = await filesToChange!.map((file: string) =>
+                promiseSerial(formatterPromises.filter(formatter => file.match(formatter.fileType)).map(formatter => formatter.fnc), file)
+            );
+            return await results.reduce(toFinalResult, Promise.resolve({ autofixes: [], failures: [] }));
         } catch (err) {
             console.log(err);
             return null;
@@ -41,10 +45,15 @@ export function setup<T extends boolean>(config: FormatterRunnerConfig<T>): Pret
 
     async function runCheckPipe() {
         try {
-            const filesToChange = config.resolveChangeFiles ?  await getChangedFilesFromGit() : config.changedFiles;
-            const formatterPromises = formatters.map(({formatter, fileType = ""}) => ({fnc: formatter.check, fileType: fileType || ""}));
-            const results: NullableResults[] = await filesToChange!.map((file: string) => promiseSerial(formatterPromises.filter((formatter) => file.match(formatter.fileType)).map((formatter) => formatter.fnc), file));
-            return await results.reduce(toFinalResult, Promise.resolve({autofixes: [], failures: []}));
+            const filesToChange = config.resolveChangeFiles ? await getChangedFilesFromGit() : config.changedFiles;
+            const formatterPromises = formatters.map(({ formatter, fileType = "" }) => ({
+                fnc: formatter.check,
+                fileType: fileType || ""
+            }));
+            const results: NullableResults[] = await filesToChange!.map((file: string) =>
+                promiseSerial(formatterPromises.filter(formatter => file.match(formatter.fileType)).map(formatter => formatter.fnc), file)
+            );
+            return await results.reduce(toFinalResult, Promise.resolve({ autofixes: [], failures: [] }));
         } catch (err) {
             console.log(err);
             return null;
@@ -61,17 +70,23 @@ export function setup<T extends boolean>(config: FormatterRunnerConfig<T>): Pret
     }
 
     async function toFinalResult(finalResult: Promise<IResult>, formattersResults: NullableResults) {
-        const reducedResults = await formattersResults.then((formatterResult) => formatterResult.filter(notNull));
-        const reducedResult = reducedResults.reduce(((previousValue, currentValue) => ({autofixes: [...previousValue.autofixes, ...currentValue.autofixes], failures: [...previousValue.failures, ...currentValue.failures]})), {autofixes: [], failures: []});
+        const reducedResults = await formattersResults.then(formatterResult => formatterResult.filter(notNull));
+        const reducedResult = reducedResults.reduce(
+            (previousValue, currentValue) => ({
+                autofixes: [...previousValue.autofixes, ...currentValue.autofixes],
+                failures: [...previousValue.failures, ...currentValue.failures]
+            }),
+            { autofixes: [], failures: [] }
+        );
         let result = await finalResult;
         result = {
             autofixes: [...result.autofixes, ...reducedResult.autofixes],
-            failures: [...result.failures, ...reducedResult.failures],
+            failures: [...result.failures, ...reducedResult.failures]
         };
         return result;
     }
 
-    function notNull<TValue>(value: TValue|null): value is TValue {
+    function notNull<TValue>(value: TValue | null): value is TValue {
         return value !== null;
     }
 
@@ -79,6 +94,5 @@ export function setup<T extends boolean>(config: FormatterRunnerConfig<T>): Pret
         runFixPipe,
         runCheckPipe,
         registerFormatter
-    }
+    };
 }
-

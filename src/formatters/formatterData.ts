@@ -1,4 +1,4 @@
-import {RuleFailure} from "tslint";
+import { RuleFailure } from "tslint";
 
 export interface IFormatter {
     check: FormattingFunction;
@@ -6,12 +6,12 @@ export interface IFormatter {
 }
 
 export interface FormattingFunction {
-    (filePath: string): Promise<NullableResult>
+    (filePath: string): Promise<NullableResult>;
 }
 
-export type NullableResult = IResult|null;
+export type NullableResult = IResult | null;
 
-export type NullableResults = Promise<NullableResult[]>
+export type NullableResults = Promise<NullableResult[]>;
 
 export interface IResult {
     failures: IResultPointer[];
@@ -24,7 +24,6 @@ export interface IResultPointer {
     pointer: IPointer;
 }
 
-
 export interface IPointer {
     line: number;
     character: number;
@@ -35,5 +34,5 @@ export function fromRuleFailureToResult(ruleFailure: RuleFailure): IResultPointe
         description: ruleFailure.getFailure(),
         file: ruleFailure.getFileName(),
         pointer: ruleFailure.getStartPosition().getLineAndCharacter()
-    }
+    };
 }
