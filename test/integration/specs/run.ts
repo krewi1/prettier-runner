@@ -1,9 +1,9 @@
-import {setup} from "../../../src/formatterRunner";
-import {join, resolve} from "path";
-import {unlinkFileAsync, writeFileAsync} from "../../../src/promisify";
-import {TsLint} from "../../../src/formatters/typescriptFormatter";
-import {Prettier} from "../../../src/formatters/prettierFormatter";
-import {expect} from "chai";
+import { setup } from "../../../src/formatterRunner";
+import { join, resolve } from "path";
+import { unlinkFileAsync, writeFileAsync } from "../../../src/promisify";
+import { TsLint } from "../../../src/formatters/typescriptFormatter";
+import { Prettier } from "../../../src/formatters/prettierFormatter";
+import { expect } from "chai";
 
 const dirname: string = __dirname;
 const packageJsonPath: string = join(dirname, "package.json");
@@ -53,10 +53,7 @@ function log(): void {
         // @ts-ignore
         const runner = setup({
             resolveChangeFiles: false,
-            changedFiles: [
-                jsPath1,
-                jsPath2
-            ]
+            changedFiles: [jsPath1, jsPath2]
         });
         runner.registerFormatter({
             formatter: await TsLint({
@@ -94,8 +91,8 @@ function log(): void {
                     description: "Named imports must be alphabetized.",
                     file: "D:/projects/prettier-runner/test/integration/specs/test2.ts",
                     pointer: {
-                        "line": 1,
-                        "character": 8
+                        line: 1,
+                        character: 8
                     }
                 },
                 {
@@ -128,8 +125,8 @@ function log(): void {
                     description: "expected call-signature: 'f' to have a typedef",
                     file: "D:/projects/prettier-runner/test/integration/specs/test1.ts",
                     pointer: {
-                        "line": 1,
-                        "character": 16
+                        line: 1,
+                        character: 16
                     }
                 }
             ]
@@ -139,10 +136,7 @@ function log(): void {
     it("can check source codes in check mode", async () => {
         const runner = setup({
             resolveChangeFiles: false,
-            changedFiles: [
-                jsPath1,
-                jsPath2
-            ]
+            changedFiles: [jsPath1, jsPath2]
         });
         runner.registerFormatter({
             formatter: await TsLint({
@@ -181,24 +175,24 @@ function log(): void {
                     description: "expected call-signature: 'f' to have a typedef",
                     file: "D:/projects/prettier-runner/test/integration/specs/test1.ts",
                     pointer: {
-                        "line": 2,
-                        "character": 16
+                        line: 2,
+                        character: 16
                     }
                 },
                 {
                     description: "Named imports must be alphabetized.",
                     file: "D:/projects/prettier-runner/test/integration/specs/test2.ts",
                     pointer: {
-                        "line": 1,
-                        "character": 8
+                        line: 1,
+                        character: 8
                     }
                 },
                 {
                     description: "'log' is declared but its value is never read.",
                     file: "D:/projects/prettier-runner/test/integration/specs/test2.ts",
                     pointer: {
-                        "line": 4,
-                        "character": 9
+                        line: 4,
+                        character: 9
                     }
                 },
                 {
@@ -233,5 +227,5 @@ function log(): void {
         await unlinkFileAsync(jsPath1);
         await unlinkFileAsync(jsPath2);
         await unlinkFileAsync(packageJsonPath);
-    })
+    });
 });
